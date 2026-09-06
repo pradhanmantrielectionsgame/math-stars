@@ -10,9 +10,18 @@ const buttons = [...document.querySelectorAll('#choices button')];
 let state = {level: store.get('level', 0), stars: store.get('stars', 0)};
 let q = null, locked = false;
 
+/**
+ * Redraw the star row. `count` is passed explicitly because the fifth star is
+ * shown lit for a moment after promotion has already reset it to zero.
+ */
+function stars(count = state.stars, pop = false) {
+  $('#stars').innerHTML = Array.from({length: STARS_PER_LEVEL}, (_, i) =>
+    `<i class="${i < count ? 'on' : ''}${pop && i === count - 1 ? ' pop' : ''}">★</i>`).join('');
+}
+
 function render() {
   $('#level').textContent = LEVELS[state.level].name;
-  $('#stars').textContent = '★'.repeat(state.stars) + '☆'.repeat(STARS_PER_LEVEL - state.stars);
+  stars();
   $('#mute').textContent = sfx.muted ? '🔇' : '🔊';
   $('#q').textContent = q.text;
   $('#q').className = '';
@@ -35,17 +44,23 @@ function answer(btn) {
     btn.className = 'wrong'; btn.disabled = true;
     sfx.beep(180, .12, 'sine');
     state = advance(state, false);
-    $('#stars').textContent = '★'.repeat(state.stars) + '☆'.repeat(STARS_PER_LEVEL - state.stars);
+    stars();
     return;
   }
   locked = true;
   btn.className = 'right';
   $('#q').className = 'right';
   const before = state.level;
+  const filled = state.stars + 1;
   state = advance(state, true);
   save();
+  stars(filled, true);
   [660, 880].forEach((f, i) => setTimeout(() => sfx.beep(f, .1, 'sine'), i * 90));
-  if (state.level !== before) setTimeout(() => sfx.beep(1320, .18, 'sine'), 260);
+  if (state.level !== before) {
+    setTimeout(() => sfx.beep(1320, .18, 'sine'), 260);
+    $('#q').className = 'party';
+    $('#q').textContent = '🎉 Level up! 🎉';
+  }
   setTimeout(() => { locked = false; ask(); }, state.level !== before ? 900 : 550);
 }
 

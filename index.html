@@ -12,46 +12,76 @@
 <title>Math Stars</title>
 <style>
   :root{
-    --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --label:#8e8e93;
-    --accent:#ff9500; --green:#34c759; --red:#ff3b30; --line:rgba(60,60,67,.12);
-    --radius:14px; --pad:12px;
+    --bg:#fff7ec; --bg2:#ffe9f2; --card:#fff; --text:#1c1c1e; --label:#8e8e93;
+    --accent:#ff9500; --accent2:#ff7a00; --gold:#ffcc00;
+    --green:#34c759; --red:#ff3b30;
+    --pick:#007aff; --pick2:#0a63d8;   /* every answer button, one colour */
+    --shadow:0 6px 18px rgba(255,110,60,.18);
+    --radius:20px; --pad:12px;
   }
   @media (prefers-color-scheme:dark){
-    :root{ --bg:#000; --card:#1c1c1e; --text:#fff; --label:#98989f; --line:rgba(84,84,88,.4); }
+    :root{
+      --bg:#14101c; --bg2:#1c1020; --card:#221c2b; --text:#fff; --label:#a8a2b4;
+      --pick:#0a84ff; --pick2:#0060d0;
+      --shadow:0 6px 18px rgba(0,0,0,.5);
+    }
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
   html,body{height:100%}
   body{
-    margin:0; background:var(--bg); color:var(--text);
+    margin:0; color:var(--text);
+    background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 100%); background-attachment:fixed;
     font:400 17px/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",system-ui,sans-serif;
     display:flex; flex-direction:column; align-items:center;
     padding:max(var(--pad),env(safe-area-inset-top)) var(--pad) max(var(--pad),env(safe-area-inset-bottom));
     overscroll-behavior:none; user-select:none;
   }
-  .wrap{width:100%; max-width:420px; flex:1; display:flex; flex-direction:column; gap:14px}
-  .top{display:flex; align-items:center; gap:6px; color:var(--label); font-size:14px}
-  .top b{flex:1; text-align:center; font-weight:600; color:var(--text); font-size:15px}
-  .chev{background:none; padding:6px 10px; color:var(--label); font-size:20px; line-height:1}
-  #stars{font-size:24px; letter-spacing:4px; text-align:center; height:30px}
+  .wrap{width:100%; max-width:420px; flex:1; display:flex; flex-direction:column; gap:12px}
+
+  /* level row */
+  .top{display:flex; align-items:center; gap:4px}
+  .top b{
+    flex:1; text-align:center; font-weight:700; font-size:15px; letter-spacing:-.2px;
+    background:var(--card); border-radius:999px; padding:9px 12px; box-shadow:var(--shadow);
+  }
+  .chev{background:var(--card); padding:0; width:38px; height:38px; border-radius:999px;
+        color:var(--accent); font-size:22px; line-height:1; box-shadow:var(--shadow)}
+
+  /* stars */
+  #stars{display:flex; justify-content:center; gap:6px; font-size:26px; height:32px}
+  #stars i{font-style:normal; color:var(--label); opacity:.35; transition:transform .2s}
+  #stars i.on{color:var(--gold); opacity:1; text-shadow:0 2px 8px rgba(255,204,0,.6)}
+  #stars i.pop{animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes pop{0%{transform:scale(.4) rotate(-25deg)} 60%{transform:scale(1.45) rotate(8deg)} 100%{transform:scale(1)}}
+
+  /* question card */
   #q{
-    flex:1; display:flex; align-items:center; justify-content:center;
-    background:var(--card); border-radius:22px;
-    font-weight:600; font-size:clamp(40px,13vw,64px); letter-spacing:-1px;
-    font-variant-numeric:tabular-nums; transition:background .15s;
+    flex:1; min-height:130px; display:flex; align-items:center; justify-content:center;
+    border-radius:26px; color:#fff; text-align:center;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    box-shadow:0 10px 26px rgba(255,140,0,.35);
+    font-weight:700; font-size:clamp(40px,13vw,64px); letter-spacing:-1px;
+    font-variant-numeric:tabular-nums; transition:background .2s, transform .2s;
   }
-  #q.right{background:var(--green); color:#fff}
-  .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-  button{
-    font:inherit; color:var(--text); background:var(--card); border:0;
-    border-radius:var(--radius); cursor:pointer;
-  }
+  #q.right{background:linear-gradient(135deg,#34c759,#00c7be); transform:scale(1.03)}
+  #q.party{background:linear-gradient(135deg,#ffcc00,var(--accent)); font-size:clamp(30px,9vw,44px)}
+
+  /* answers */
+  .grid{flex:1; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:12px}
+  button{font:inherit; border:0; cursor:pointer; color:var(--text); background:var(--card)}
   .grid button{
-    padding:22px 8px; font-size:34px; font-weight:600; font-variant-numeric:tabular-nums;
-    transition:background .15s, color .15s, transform .1s;
+    padding:8px; min-height:78px; border-radius:var(--radius); color:#fff;
+    background:linear-gradient(150deg,var(--pick),var(--pick2));
+    font-size:36px; font-weight:700; font-variant-numeric:tabular-nums;
+    box-shadow:0 6px 16px rgba(0,110,255,.3);
+    transition:transform .12s, filter .15s, opacity .2s;
   }
-  .grid button:active{transform:scale(.96)}
-  .grid button.wrong{background:var(--red); color:#fff; opacity:.45}
-  .grid button.right{background:var(--green); color:#fff}
+  .grid button:active{transform:scale(.94)}
+  .grid button.wrong{filter:grayscale(1) brightness(.75); opacity:.4; animation:shake .35s}
+  .grid button.right{animation:cheer .5s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes shake{25%{transform:translateX(-7px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+  @keyframes cheer{0%{transform:scale(1)}45%{transform:scale(1.14)}100%{transform:scale(1)}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
 </style>
 </head>
 <body>
