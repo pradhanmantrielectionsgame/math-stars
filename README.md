@@ -16,16 +16,16 @@ A **set** is ten sums at your level. Ten stars moves you up.
 | 2 | a silver star |
 | 3 | a bronze star |
 
-Every wrong tap costs a heart, and there are only three — three wrong taps
-demote you a level, whether they land on three sums or all on the same one.
-Guessing your way through is therefore never a strategy: three taps of guessing
-is the whole budget for a ten-sum set.
+Every wrong tap costs a heart, and the five hearts are the budget for the
+**whole set**, not for one sum — they carry from sum to sum. Run out and you
+lose the set: the stars go, the board locks for five seconds, and you drop a
+level. Guessing your way through is never a strategy, because the hearts run
+out long before ten sums do.
 
-A demotion clears the set, refills the hearts and sits out a five-second
-cooldown. **Two demotions end the run** — the card turns red and a tap starts
-you again at the level you fell to. Moving up a level clears the demotion count.
+**Two lost sets end the run.** The card turns red and a tap starts you again.
+Moving up a level clears that count.
 
-The first level has nowhere to fall, so there the hearts just refill.
+The first level has nowhere to fall, so there you lose the set and stay put.
 
 Eleven levels, pre-K counting through grade 5 mixed operations and negative
 answers. Right and wrong each have their own sound and buzz — rising notes and

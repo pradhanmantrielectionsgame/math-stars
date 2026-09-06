@@ -14,7 +14,7 @@
   :root{
     --bg:#fff7ec; --bg2:#ffe9f2; --card:#fff; --text:#1c1c1e; --label:#8e8e93;
     --accent:#ff9500; --accent2:#ff7a00;
-    --gold:#ffcc00; --silver:#b9c2cc; --bronze:#d1813f;
+    --gold:#ffcc00; --silver:#8fa0b3; --bronze:#c87524;   /* light mode needs darker metals */
     --green:#34c759; --red:#ff3b30;
     --pick:#007aff; --pick2:#0a63d8;   /* every answer button, one colour */
     --shadow:0 6px 18px rgba(255,110,60,.18);
@@ -24,6 +24,7 @@
     :root{
       --bg:#14101c; --bg2:#1c1020; --card:#221c2b; --text:#fff; --label:#a8a2b4;
       --pick:#0a84ff; --pick2:#0060d0;
+      --silver:#dbe4ee; --bronze:#e08b3c;
       --shadow:0 6px 18px rgba(0,0,0,.5);
     }
   }
@@ -52,11 +53,11 @@
   .meters{display:flex; align-items:center; gap:10px; height:26px}
   #stars{flex:1; display:flex; gap:3px; font-size:20px}
   #hearts{display:flex; gap:2px; font-size:17px}
-  .meters i{font-style:normal; color:var(--label); opacity:.3; transition:transform .2s, opacity .3s}
+  .meters i{font-style:normal; color:var(--label); opacity:.16; transition:transform .2s, opacity .3s}
   /* one tap gold, two silver, three bronze */
   #stars i.g1{color:var(--gold); opacity:1; text-shadow:0 2px 8px rgba(255,204,0,.6)}
-  #stars i.g2{color:var(--silver); opacity:1}
-  #stars i.g3{color:var(--bronze); opacity:1}
+  #stars i.g2{color:var(--silver); opacity:1; text-shadow:0 1px 5px rgba(160,180,200,.7)}
+  #stars i.g3{color:var(--bronze); opacity:1; text-shadow:0 1px 5px rgba(224,139,60,.5)}
   #hearts i.on{color:var(--red); opacity:1}
   .meters i.pop{animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
   @keyframes pop{0%{transform:scale(.4) rotate(-25deg)} 60%{transform:scale(1.45) rotate(8deg)} 100%{transform:scale(1)}}

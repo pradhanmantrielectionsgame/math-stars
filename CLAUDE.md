@@ -15,12 +15,19 @@ Pre-K to grade 5 math practice, one tap at a time.
 - A **set** is `STARS_PER_LEVEL` (10) sums. `state.stars` is not a count but a
   list of how many taps each won sum took: 1 gold, 2 silver, 3 bronze. Ten
   entries promotes and clears the demotion count.
-- Every wrong tap costs a heart. `HEARTS_PER_SET` (3) gone demotes, clears the
-  set, and costs a 5s cooldown; `DEMOTIONS_ALLOWED` (2) ends the run. Level 0
-  refills the hearts instead of demoting.
-- Because hearts are per-set and not per-sum, a bronze star is only reachable
-  at the start of a set — two wrong taps leave one heart, and the next wrong
-  tap anywhere demotes. That is intended: guessing is not a strategy.
+- Every wrong tap costs a heart. `HEARTS_PER_SET` (5) is the budget for the
+  whole **set**, not for a sum — hearts carry from one sum to the next and come
+  back only on a demotion, a promotion or a level change. Running out clears
+  the set, costs a 5s cooldown, and counts a demotion; `DEMOTIONS_ALLOWED` (2)
+  ends the run.
+- Five is the smallest budget that lets both grades and demotions exist: a
+  bronze star costs two hearts by itself, so at three there was no room to earn
+  one and still be at risk. Change it and check both still work.
+- Level 0 loses the set exactly like any other level, it just doesn't drop.
+  The old "refill instead of demoting" branch was a hole: tap all three wrong
+  buttons, get full hearts back, then collect a bronze on the only one left.
+  game.mjs keys off `state.change`, never `state.level !== before`, because at
+  level 0 a lost set doesn't change the level number.
 - Division is generated backwards (`a*b ÷ b`) so answers are always whole.
 - `cap` on a level limits an addition's total, so "Add to 10" means it.
   `neg` (grade 5 only) lets subtraction run past zero.

@@ -29,9 +29,17 @@ export const LEVELS = /** @type {Level[]} */ ([
   {name: 'Grade 5 · Everything',  ops: '+-*/', a: [2, 12],  b: [2, 99],  neg: true},
 ]);
 
-/** A set is ten sums: fill the stars to move up, lose the hearts to move down. */
+/**
+ * A set is ten sums: fill the stars to move up, lose the hearts to move down.
+ *
+ * Five hearts is the budget for the whole set, not for a sum — they carry from
+ * one sum to the next and only come back on a demotion, a promotion or a level
+ * change. It has to cover both grades and mistakes: a bronze star costs two
+ * hearts on its own, so five leaves room to earn a couple the hard way and
+ * still have a demotion be a real threat.
+ */
 export const STARS_PER_LEVEL = 10;
-export const HEARTS_PER_SET = 3;
+export const HEARTS_PER_SET = 5;
 /** Demotions before the run ends. Cleared by moving back up. */
 export const DEMOTIONS_ALLOWED = 2;
 /** Star grades: 1 tap gold, 2 silver, 3 bronze. */
@@ -93,8 +101,13 @@ export function makeChoices(answer, rnd, neg = false) {
  *
  * Every wrong tap costs a heart, whether the three land on three different
  * sums or all on the same one, and the third demotes. Two demotions end the
- * run. Brute-forcing therefore cannot reach the tenth star: three taps of
- * guessing is exactly the budget for a whole set.
+ * run. Brute-forcing cannot reach the tenth star: the heart budget runs out
+ * long before ten sums do.
+ *
+ * The first level has no level below it, so there a lost set costs the stars,
+ * the cooldown and a demotion, and only the drop is skipped. It is never a
+ * free refill — that hole let a player tap all four buttons and still collect
+ * a bronze star with full hearts.
  *
  * @param {{level:number, stars:number[], hearts:number, demotions:number}} state
  * @param {'right'|'wrong'} outcome
@@ -106,9 +119,8 @@ export function advance({level, stars, hearts, demotions}, outcome, tries = 1) {
 
   if (outcome === 'wrong') {
     if (hearts > 1) return same({hearts: hearts - 1});
-    if (level === 0) return same({hearts: HEARTS_PER_SET});          // nowhere down to go
     const lost = demotions + 1;
-    return {level: level - 1, stars: [], hearts: HEARTS_PER_SET, demotions: lost,
+    return {level: Math.max(0, level - 1), stars: [], hearts: HEARTS_PER_SET, demotions: lost,
             change: -1, over: lost >= DEMOTIONS_ALLOWED};
   }
   const won = [...stars, Math.min(Math.max(tries, 1), GRADES)];

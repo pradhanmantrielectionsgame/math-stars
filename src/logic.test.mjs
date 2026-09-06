@@ -49,16 +49,26 @@ test('ten right answers promote and start a fresh set', () => {
   assert.equal(s.change, 1);
 });
 
+test('hearts carry from one sum to the next, never resetting per sum', () => {
+  let s = newRun(4);
+  s = advance(s, 'wrong');                 // one bad tap on the first sum
+  s = advance(s, 'right', 2);              // then get it, silver
+  assert.equal(s.hearts, HEARTS_PER_SET - 1, 'the heart stays spent into the next sum');
+  s = advance(s, 'right');                 // a clean sum does not hand it back
+  assert.equal(s.hearts, HEARTS_PER_SET - 1);
+});
+
 test('a star remembers how many taps it took, capped at bronze', () => {
   let s = newRun(3);
   for (const tries of [1, 2, 3, 9]) s = advance(s, 'right', tries);
   assert.deepEqual(s.stars, [1, 2, 3, GRADES]);
 });
 
-// game.mjs emits one 'wrong' per tap, so three taps on a single sum and three
-// taps spread over three sums are the same sequence — which is the point.
-test('three wrong taps demote, however they are spread', () => {
-  const s = tap({level: 4, stars: [1, 1, 2], hearts: 3, demotions: 0}, 'wrong', 'wrong', 'wrong');
+// game.mjs emits one 'wrong' per tap, so a run of wrong taps on a single sum
+// and the same run spread over several sums are one sequence — that's the point.
+test('a full set of wrong taps demotes, however they are spread', () => {
+  const wrongs = Array(HEARTS_PER_SET).fill('wrong');
+  const s = tap({level: 4, stars: [1, 1, 2], hearts: HEARTS_PER_SET, demotions: 0}, ...wrongs);
   assert.equal(s.level, 3, 'should have dropped a level');
   assert.deepEqual(s.stars, [], 'the set restarts');
   assert.equal(s.hearts, HEARTS_PER_SET);
@@ -66,7 +76,7 @@ test('three wrong taps demote, however they are spread', () => {
 });
 
 test('brute forcing cannot reach the tenth star', () => {
-  // Three taps of guessing is the whole budget: the set is gone before it ends.
+  // One guess per sum runs the heart budget out before the set can finish.
   let s = {level: 4, stars: [], hearts: HEARTS_PER_SET, demotions: 0};
   for (let sum = 0; sum < STARS_PER_LEVEL; sum++) {
     s = tap(s, 'wrong');                 // one wrong guess per sum, then the answer
@@ -78,14 +88,14 @@ test('brute forcing cannot reach the tenth star', () => {
 
 test('two demotions end the run', () => {
   const wrongs = Array(HEARTS_PER_SET * DEMOTIONS_ALLOWED).fill('wrong');
-  const s = tap({level: 5, stars: [1, 1], hearts: 3, demotions: 0}, ...wrongs);
+  const s = tap({level: 5, stars: [1, 1], hearts: HEARTS_PER_SET, demotions: 0}, ...wrongs);
   assert.equal(s.level, 3);
   assert.equal(s.demotions, DEMOTIONS_ALLOWED);
   assert.equal(s.over, true);
 });
 
 test('moving back up clears the demotion count', () => {
-  let s = tap(newRun(5), 'wrong', 'wrong', 'wrong');
+  let s = tap(newRun(5), ...Array(HEARTS_PER_SET).fill('wrong'));
   assert.equal(s.demotions, 1);
   s = tap(s, ...Array(STARS_PER_LEVEL).fill('right'));
   assert.equal(s.level, 5);
@@ -93,16 +103,27 @@ test('moving back up clears the demotion count', () => {
   assert.equal(s.over, false);
 });
 
-test('the first level refills hearts instead of demoting below itself', () => {
-  const s = tap(newRun(0), 'wrong', 'wrong', 'wrong');
-  assert.deepEqual({level: s.level, hearts: s.hearts, demotions: s.demotions, over: s.over},
-                   {level: 0, hearts: HEARTS_PER_SET, demotions: 0, over: false});
+test('the first level loses the set too — the refill is never free', () => {
+  const s = tap(newRun(0), ...Array(HEARTS_PER_SET).fill('wrong'));
+  assert.equal(s.level, 0, 'there is nowhere below the first level');
+  assert.deepEqual(s.stars, [], 'but the set is still lost');
+  assert.equal(s.demotions, 1, 'and it still counts against the run');
+  assert.equal(s.change, -1, 'so the board locks and the cooldown runs');
+});
+
+test('running the hearts out never hands back a star on the next tap', () => {
+  // The hole this closes: tap every wrong button, get the refill, then collect
+  // a bronze star on the only button left.
+  let s = {level: 0, stars: [1, 1], hearts: 1, demotions: 0};
+  s = advance(s, 'wrong');
+  assert.equal(s.change, -1, 'the set ends on that tap, it does not carry on');
+  assert.deepEqual(s.stars, []);
 });
 
 test('the last level does not promote past the end', () => {
   const last = LEVELS.length - 1;
   const nearly = Array(STARS_PER_LEVEL - 1).fill(1);
-  const s = advance({level: last, stars: nearly, hearts: 3, demotions: 0}, 'right');
+  const s = advance({level: last, stars: nearly, hearts: HEARTS_PER_SET, demotions: 0}, 'right');
   assert.equal(s.level, last);
   assert.equal(s.stars.length, STARS_PER_LEVEL, 'the last level just keeps filling');
   assert.equal(s.change, 0);

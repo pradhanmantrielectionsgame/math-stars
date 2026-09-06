@@ -104,17 +104,17 @@ function answer(btn) {
   if (!correct) {
     btn.className = 'wrong'; btn.disabled = true;
     feedback('wrong');
-    const before = state.level;
     state = advance(state, 'wrong');
     save();
     meters();
-    if (state.level !== before) { locked = true; demoted(); }
+    // change, not the level number — the first level loses its set without
+    // dropping, and that still has to lock the board.
+    if (state.change === -1) { locked = true; demoted(); }
     return;
   }
 
   locked = true;
   btn.className = 'right';
-  const before = state.level;
   const grade = Math.min(tries, GRADES);
   const won = [...state.stars, grade];
   state = advance(state, 'right', tries);
@@ -123,15 +123,16 @@ function answer(btn) {
   meters(won, true);
   feedback(['gold', 'silver', 'bronze'][grade - 1]);
 
-  if (state.level !== before) {
+  const up = state.change === 1;
+  if (up) {
     setTimeout(() => feedback('levelUp'), 300);
     card('\ud83c\udf89 Level up! \ud83c\udf89', 'party');
     $('#level').textContent = LEVELS[state.level].name;
   }
-  setTimeout(() => { locked = false; ask(); }, state.level !== before ? 900 : 550);
+  setTimeout(() => { locked = false; ask(); }, up ? 900 : 550);
 }
 
-/** Three wrong taps: drop a level, sit out the cooldown, then carry on — or stop. */
+/** Hearts gone: lose the set, drop a level if there is one, sit out the cooldown. */
 function demoted() {
   buttons.forEach(b => { b.disabled = true; b.className = 'off'; });
   $('#level').textContent = LEVELS[state.level].name;
@@ -140,7 +141,8 @@ function demoted() {
   feedback('demoted');
 
   let left = COOLDOWN;
-  const tick = () => card(`Let\u2019s try easier\n${left}`, 'easier');
+  const label = state.level === 0 ? 'Try again' : 'Let’s try easier';
+  const tick = () => card(`${label}\n${left}`, 'easier');
   tick();
   timer = setInterval(() => {
     if (--left > 0) return tick();
