@@ -47,11 +47,14 @@
   .chev{background:var(--card); padding:0; width:38px; height:38px; border-radius:999px;
         color:var(--accent); font-size:22px; line-height:1; box-shadow:var(--shadow)}
 
-  /* stars */
-  #stars{display:flex; justify-content:center; gap:6px; font-size:26px; height:32px}
-  #stars i{font-style:normal; color:var(--label); opacity:.35; transition:transform .2s}
+  /* stars earned this set, hearts left this set */
+  .meters{display:flex; align-items:center; gap:10px; height:26px}
+  #stars{flex:1; display:flex; gap:3px; font-size:20px}
+  #hearts{display:flex; gap:2px; font-size:17px}
+  .meters i{font-style:normal; color:var(--label); opacity:.3; transition:transform .2s, opacity .3s}
   #stars i.on{color:var(--gold); opacity:1; text-shadow:0 2px 8px rgba(255,204,0,.6)}
-  #stars i.pop{animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+  #hearts i.on{color:var(--red); opacity:1}
+  .meters i.pop{animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
   @keyframes pop{0%{transform:scale(.4) rotate(-25deg)} 60%{transform:scale(1.45) rotate(8deg)} 100%{transform:scale(1)}}
 
   /* question card */
@@ -64,6 +67,9 @@
     font-variant-numeric:tabular-nums; transition:background .2s, transform .2s;
   }
   #q.right{background:linear-gradient(135deg,#34c759,#00c7be); transform:scale(1.03)}
+  /* right in the end, but it took more than one tap — no star, no green */
+  #q.late{background:linear-gradient(135deg,#9b9ba1,#6d6d73)}
+  #q.easier{background:linear-gradient(135deg,#5ac8fa,#007aff); font-size:clamp(26px,8vw,38px)}
   #q.party{background:linear-gradient(135deg,#ffcc00,var(--accent)); font-size:clamp(30px,9vw,44px)}
 
   /* answers */
@@ -92,7 +98,10 @@
     <button class="chev" id="mute" aria-label="Sound">🔊</button>
     <button class="chev" id="next" aria-label="Harder">›</button>
   </div>
-  <div id="stars"></div>
+  <div class="meters">
+    <div id="stars"></div>
+    <div id="hearts"></div>
+  </div>
   <div id="q">—</div>
   <div class="grid" id="choices">
     <button></button><button></button><button></button><button></button>
