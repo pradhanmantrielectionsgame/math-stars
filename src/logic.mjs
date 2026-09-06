@@ -32,6 +32,10 @@ export const LEVELS = /** @type {Level[]} */ ([
 /** A set is ten sums: fill the stars to move up, lose the hearts to move down. */
 export const STARS_PER_LEVEL = 10;
 export const HEARTS_PER_SET = 3;
+/** Demotions before the run ends. Cleared by moving back up. */
+export const DEMOTIONS_ALLOWED = 2;
+/** Star grades: 1 tap gold, 2 silver, 3 bronze. */
+export const GRADES = 3;
 const SYM = {'+': '+', '-': '−', '*': '×', '/': '÷'};
 
 const pick = (rnd, [lo, hi]) => lo + Math.floor(rnd() * (hi - lo + 1));
@@ -83,28 +87,35 @@ export function makeChoices(answer, rnd, neg = false) {
 /**
  * Score one answer and return the new state.
  *
- * A set is ten sums at the current level. Each sum is worth one star if it is
- * right on the first tap, and costs one heart if it is not — however many wrong
- * buttons get tapped afterwards, a sum can only ever cost one heart.
+ * A set is ten sums at the current level. `stars` is the list of sums already
+ * won, each holding the number of taps it took — 1 gold, 2 silver, 3 bronze —
+ * so the row shows not just how far along the set is but how it was earned.
  *
- * - `'right'` — first tap correct: +1 star. Ten stars promotes and starts a new set.
- * - `'late'`  — correct only after a wrong tap: nothing at all. The heart is
- *   already gone, and getting there by elimination never pays.
- * - `'wrong'` — the first wrong tap on a sum: −1 heart. Three demotes and
- *   starts a new set, except on the first level, where the hearts just refill.
+ * Every wrong tap costs a heart, whether the three land on three different
+ * sums or all on the same one, and the third demotes. Two demotions end the
+ * run. Brute-forcing therefore cannot reach the tenth star: three taps of
+ * guessing is exactly the budget for a whole set.
  *
- * @param {{level:number, stars:number, hearts:number}} state
- * @param {'right'|'late'|'wrong'} outcome
- * @returns {{level:number, stars:number, hearts:number, change:-1|0|1}}
+ * @param {{level:number, stars:number[], hearts:number, demotions:number}} state
+ * @param {'right'|'wrong'} outcome
+ * @param {number} [tries] taps this sum took, only read when the answer is right
+ * @returns {{level:number, stars:number[], hearts:number, demotions:number, change:-1|0|1, over:boolean}}
  */
-export function advance({level, stars, hearts}, outcome) {
+export function advance({level, stars, hearts, demotions}, outcome, tries = 1) {
+  const same = extra => ({level, stars, hearts, demotions, change: 0, over: false, ...extra});
+
   if (outcome === 'wrong') {
-    if (hearts > 1) return {level, stars, hearts: hearts - 1, change: 0};
-    if (level === 0) return {level, stars, hearts: HEARTS_PER_SET, change: 0};  // nowhere down to go
-    return {level: level - 1, stars: 0, hearts: HEARTS_PER_SET, change: -1};
+    if (hearts > 1) return same({hearts: hearts - 1});
+    if (level === 0) return same({hearts: HEARTS_PER_SET});          // nowhere down to go
+    const lost = demotions + 1;
+    return {level: level - 1, stars: [], hearts: HEARTS_PER_SET, demotions: lost,
+            change: -1, over: lost >= DEMOTIONS_ALLOWED};
   }
-  if (outcome !== 'right') return {level, stars, hearts, change: 0};
-  if (stars + 1 >= STARS_PER_LEVEL && level < LEVELS.length - 1)
-    return {level: level + 1, stars: 0, hearts: HEARTS_PER_SET, change: 1};
-  return {level, stars: Math.min(stars + 1, STARS_PER_LEVEL), hearts, change: 0};
+  const won = [...stars, Math.min(Math.max(tries, 1), GRADES)];
+  if (won.length >= STARS_PER_LEVEL && level < LEVELS.length - 1)
+    return {level: level + 1, stars: [], hearts: HEARTS_PER_SET, demotions: 0, change: 1, over: false};
+  return same({stars: won});
 }
+
+/** A fresh run at `level`. Used at boot, after game over, and by the level arrows. */
+export const newRun = (level = 0) => ({level, stars: [], hearts: HEARTS_PER_SET, demotions: 0});

@@ -33,8 +33,33 @@ export function onInput(el, cb, {threshold = 24} = {}) {
   });
 }
 
-/** Short vibration. No-op where unsupported (all of iOS Safari, today). */
-export const haptic = (pattern = 8) => { try { navigator.vibrate?.(pattern); } catch {} };
+let taptic;   // the iOS shim, built on first use
+
+/**
+ * Short vibration. `navigator.vibrate` covers Android; iOS Safari ignores it
+ * entirely, so there we toggle a hidden switch control, which Safari 17.4+
+ * answers with a real taptic tick.
+ *
+ * ponytail: the switch gives one fixed tick — no patterns, no strength. Good
+ * enough for "that was wrong". Anything richer needs a native wrapper, which
+ * the hub standard rules out.
+ * @param {number|number[]} [pattern] milliseconds, or an on/off pattern
+ */
+export function haptic(pattern = 8) {
+  try { if (navigator.vibrate?.(pattern)) return; } catch {}
+  try {
+    if (!taptic) {
+      taptic = document.createElement('input');
+      taptic.type = 'checkbox';
+      taptic.setAttribute('switch', '');           // the bit Safari reacts to
+      taptic.style.cssText = 'position:absolute;opacity:0;pointer-events:none';
+      document.body.appendChild(taptic);
+    }
+    // Must run inside the user gesture that triggered it, which every caller does.
+    const ticks = Array.isArray(pattern) ? Math.ceil(pattern.length / 2) : 1;
+    for (let i = 0; i < ticks; i++) setTimeout(() => taptic.click(), i * 90);
+  } catch {}
+}
 
 /**
  * Namespaced localStorage that never throws (private mode, blocked site data).

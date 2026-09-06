@@ -13,7 +13,8 @@
 <style>
   :root{
     --bg:#fff7ec; --bg2:#ffe9f2; --card:#fff; --text:#1c1c1e; --label:#8e8e93;
-    --accent:#ff9500; --accent2:#ff7a00; --gold:#ffcc00;
+    --accent:#ff9500; --accent2:#ff7a00;
+    --gold:#ffcc00; --silver:#b9c2cc; --bronze:#d1813f;
     --green:#34c759; --red:#ff3b30;
     --pick:#007aff; --pick2:#0a63d8;   /* every answer button, one colour */
     --shadow:0 6px 18px rgba(255,110,60,.18);
@@ -52,7 +53,10 @@
   #stars{flex:1; display:flex; gap:3px; font-size:20px}
   #hearts{display:flex; gap:2px; font-size:17px}
   .meters i{font-style:normal; color:var(--label); opacity:.3; transition:transform .2s, opacity .3s}
-  #stars i.on{color:var(--gold); opacity:1; text-shadow:0 2px 8px rgba(255,204,0,.6)}
+  /* one tap gold, two silver, three bronze */
+  #stars i.g1{color:var(--gold); opacity:1; text-shadow:0 2px 8px rgba(255,204,0,.6)}
+  #stars i.g2{color:var(--silver); opacity:1}
+  #stars i.g3{color:var(--bronze); opacity:1}
   #hearts i.on{color:var(--red); opacity:1}
   .meters i.pop{animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
   @keyframes pop{0%{transform:scale(.4) rotate(-25deg)} 60%{transform:scale(1.45) rotate(8deg)} 100%{transform:scale(1)}}
@@ -65,11 +69,13 @@
     box-shadow:0 10px 26px rgba(255,140,0,.35);
     font-weight:700; font-size:clamp(40px,13vw,64px); letter-spacing:-1px;
     font-variant-numeric:tabular-nums; transition:background .2s, transform .2s;
+    white-space:pre-line;                 /* the multi-line cards below */
   }
   #q.right{background:linear-gradient(135deg,#34c759,#00c7be); transform:scale(1.03)}
-  /* right in the end, but it took more than one tap — no star, no green */
-  #q.late{background:linear-gradient(135deg,#9b9ba1,#6d6d73)}
+  #q.silver{background:linear-gradient(135deg,#9aa7b4,#7d8a99); transform:scale(1.02)}
+  #q.bronze{background:linear-gradient(135deg,#d1813f,#a35f27)}
   #q.easier{background:linear-gradient(135deg,#5ac8fa,#007aff); font-size:clamp(26px,8vw,38px)}
+  #q.over{background:linear-gradient(135deg,#ff3b30,#c1121f); font-size:clamp(26px,8vw,38px); cursor:pointer}
   #q.party{background:linear-gradient(135deg,#ffcc00,var(--accent)); font-size:clamp(30px,9vw,44px)}
 
   /* answers */
@@ -84,6 +90,7 @@
   }
   .grid button:active{transform:scale(.94)}
   .grid button.wrong{filter:grayscale(1) brightness(.75); opacity:.4; animation:shake .35s}
+  .grid button.off{filter:grayscale(1) brightness(.85); opacity:.25}
   .grid button.right{animation:cheer .5s cubic-bezier(.2,1.6,.4,1)}
   @keyframes shake{25%{transform:translateX(-7px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
   @keyframes cheer{0%{transform:scale(1)}45%{transform:scale(1.14)}100%{transform:scale(1)}}
