@@ -11,10 +11,9 @@
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <title>Math Stars</title>
 <style>
-  /* iOS-flavoured tokens. Light values on :root, dark overridden below. */
   :root{
     --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --label:#8e8e93;
-    --accent:#ff9500; --line:rgba(60,60,67,.12);
+    --accent:#ff9500; --green:#34c759; --red:#ff3b30; --line:rgba(60,60,67,.12);
     --radius:14px; --pad:12px;
   }
   @media (prefers-color-scheme:dark){
@@ -29,31 +28,44 @@
     padding:max(var(--pad),env(safe-area-inset-top)) var(--pad) max(var(--pad),env(safe-area-inset-bottom));
     overscroll-behavior:none; user-select:none;
   }
-  .wrap{width:100%; max-width:420px; display:flex; flex-direction:column; gap:10px}
-  .row{display:flex; gap:8px; align-items:center}
-  h1{font-size:26px; font-weight:700; letter-spacing:-.5px; margin:0; flex:1}
-  .card{background:var(--card); border-radius:var(--radius); padding:6px 12px; min-width:78px; text-align:center}
-  .card b{display:block; font-size:20px; font-weight:700; font-variant-numeric:tabular-nums}
-  .card small{color:var(--label); font-size:10px; text-transform:uppercase; letter-spacing:.6px}
-  button{font:inherit; color:var(--text); background:var(--card); border:0;
-         border-radius:var(--radius); padding:12px 16px; font-weight:600; cursor:pointer}
-  button:active{opacity:.6}
-  #board{position:relative; width:100%; aspect-ratio:1; background:var(--card);
-         border-radius:16px; display:flex; align-items:center; justify-content:center;
-         color:var(--label); text-align:center; padding:24px}
+  .wrap{width:100%; max-width:420px; flex:1; display:flex; flex-direction:column; gap:14px}
+  .top{display:flex; align-items:center; gap:6px; color:var(--label); font-size:14px}
+  .top b{flex:1; text-align:center; font-weight:600; color:var(--text); font-size:15px}
+  .chev{background:none; padding:6px 10px; color:var(--label); font-size:20px; line-height:1}
+  #stars{font-size:24px; letter-spacing:4px; text-align:center; height:30px}
+  #q{
+    flex:1; display:flex; align-items:center; justify-content:center;
+    background:var(--card); border-radius:22px;
+    font-weight:600; font-size:clamp(40px,13vw,64px); letter-spacing:-1px;
+    font-variant-numeric:tabular-nums; transition:background .15s;
+  }
+  #q.right{background:var(--green); color:#fff}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  button{
+    font:inherit; color:var(--text); background:var(--card); border:0;
+    border-radius:var(--radius); cursor:pointer;
+  }
+  .grid button{
+    padding:22px 8px; font-size:34px; font-weight:600; font-variant-numeric:tabular-nums;
+    transition:background .15s, color .15s, transform .1s;
+  }
+  .grid button:active{transform:scale(.96)}
+  .grid button.wrong{background:var(--red); color:#fff; opacity:.45}
+  .grid button.right{background:var(--green); color:#fff}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="row">
-    <h1>Math Stars</h1>
-    <div class="card"><small>Score</small><b id="score">0</b></div>
-    <div class="card"><small>Best</small><b id="best">0</b></div>
+  <div class="top">
+    <button class="chev" id="prev" aria-label="Easier">‹</button>
+    <b id="level">—</b>
+    <button class="chev" id="mute" aria-label="Sound">🔊</button>
+    <button class="chev" id="next" aria-label="Harder">›</button>
   </div>
-  <div id="board">Swipe or tap here</div>
-  <div class="row">
-    <button id="new" style="flex:1">New Game</button>
-    <button id="share">Share</button>
+  <div id="stars"></div>
+  <div id="q">—</div>
+  <div class="grid" id="choices">
+    <button></button><button></button><button></button><button></button>
   </div>
 </div>
 <script type="module" src="./src/game.mjs"></script>
