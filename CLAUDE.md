@@ -56,6 +56,10 @@ Pre-K to grade 5 math practice, one tap at a time.
   the icon is deliberately the answer-button blue, not the orange chrome. Grid
   of operators was the first try and read as a calculator. Nothing regenerates
   the icons automatically; re-run it by hand after editing.
+- Icon URLs carry a `?v=N` in `index.html` and the manifest. iOS caches the
+  home-screen icon by URL and re-adding the app does not refetch it, so a
+  redrawn icon at the same path never reaches a phone that already installed
+  it. Bump `N` in both files whenever the art changes.
 - The star's outer radius is capped at `.41` because the manifest declares a
   maskable icon and Android crops that to a centred circle of radius `.4`.
   Grow the star past that and the points get clipped on Android.
