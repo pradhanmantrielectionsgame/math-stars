@@ -3,6 +3,10 @@
 All notable changes to Math Stars. Entries are generated from commit subjects
 by `npm run release`, so write commit subjects you'd be happy to read here.
 
+## [0.2.3] - 2026-09-07
+
+- fix: version the icon URLs so iOS actually refetches them
+
 ## [0.2.2] - 2026-09-07
 
 - feat: icon is a gold star with a plus in it, not an operator grid

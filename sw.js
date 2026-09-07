@@ -7,7 +7,7 @@
 // ponytail: no hand-maintained precache list. The shell is precached; every
 // other same-origin GET is cached the first time it is fetched, which for a
 // game that loads its whole self on boot means the second visit is offline-ready.
-const VERSION = '0.2.2';
+const VERSION = '0.2.3';
 const CACHE = `game-${VERSION}`;
 const SHELL = ['./', './index.html', './manifest.webmanifest'];
 
