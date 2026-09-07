@@ -51,6 +51,11 @@ Pre-K to grade 5 math practice, one tap at a time.
 - Saves from before graded stars held a number in `stars`; game.mjs falls back
   to `[]` when it isn't an array.
 - `scripts/make-icons.mjs` has diverged from the template on purpose: it paints
-  the four operators instead of a flat tile. Re-run it after changing the theme
-  colour — it reads `theme_color` from the manifest, and nothing regenerates
-  the icons automatically.
+  a gold star with a plus knocked out, on blue, rather than a flat tile. Its
+  colours are constants in that file now, not the manifest's `theme_color` —
+  the icon is deliberately the answer-button blue, not the orange chrome. Grid
+  of operators was the first try and read as a calculator. Nothing regenerates
+  the icons automatically; re-run it by hand after editing.
+- The star's outer radius is capped at `.41` because the manifest declares a
+  maskable icon and Android crops that to a centred circle of radius `.4`.
+  Grow the star past that and the points get clipped on Android.
