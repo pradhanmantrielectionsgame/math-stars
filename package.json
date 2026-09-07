@@ -1,6 +1,6 @@
 {
   "name": "math-stars",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Pre-K to grade 5 math practice, one tap at a time.",
   "private": true,
   "type": "module",
