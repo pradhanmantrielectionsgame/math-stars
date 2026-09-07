@@ -50,3 +50,7 @@ Pre-K to grade 5 math practice, one tap at a time.
   `‹ ›` instead.
 - Saves from before graded stars held a number in `stars`; game.mjs falls back
   to `[]` when it isn't an array.
+- `scripts/make-icons.mjs` has diverged from the template on purpose: it paints
+  the four operators instead of a flat tile. Re-run it after changing the theme
+  colour — it reads `theme_color` from the manifest, and nothing regenerates
+  the icons automatically.

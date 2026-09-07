@@ -1,10 +1,11 @@
 /**
- * Writes icons/icon-192.png and icon-512.png as a flat colour.
+ * Writes icons/icon-192.png and icon-512.png: the four operators in white on
+ * the game's colour.
  *   node scripts/make-icons.mjs [#rrggbb]
  *
- * ponytail: a flat tile placeholder, ~30 lines of zlib, no image dependency.
- * Drop real artwork over these files the moment the game has an identity —
- * nothing reads the colour back.
+ * ponytail: hand-rolled zlib PNG and a per-pixel painter, no image dependency
+ * and no build step. Shapes are predicates, not paths — fine for four glyphs
+ * made of bars and dots. Anything with a curve wants real artwork instead.
  */
 import {deflateSync} from 'node:zlib';
 import {writeFileSync, mkdirSync, readFileSync} from 'node:fs';
@@ -34,15 +35,62 @@ const chunk = (type, data) => {
   return Buffer.concat([len, body, crc]);
 };
 
+/**
+ * Is (x, y) inside one of the four operator glyphs? Coordinates are 0..1 over
+ * the whole tile, so the same predicate serves every size.
+ * @param {number} x
+ * @param {number} y
+ * @returns {boolean}
+ */
+function inGlyph(x, y) {
+  const L = .105, T = .032, GAP = .062, DOT = .036;   // arm length, bar thickness
+  const bar = (dx, dy) => Math.abs(dx) <= L && Math.abs(dy) <= T;
+  const dot = (dx, dy) => Math.hypot(dx, dy) <= DOT;
+  const SQ = Math.SQRT1_2;
+
+  for (const [cx, cy, op] of [[.29, .29, '+'], [.71, .29, '-'], [.29, .71, '*'], [.71, .71, '/']]) {
+    const dx = x - cx, dy = y - cy;
+    if (Math.abs(dx) > .2 || Math.abs(dy) > .2) continue;
+    if (op === '+' && (bar(dx, dy) || bar(dy, dx))) return true;
+    if (op === '-' && bar(dx, dy)) return true;
+    if (op === '*') {                                 // the same cross, turned 45°
+      const u = (dx + dy) * SQ, v = (dx - dy) * SQ;
+      if (bar(u, v) || bar(v, u)) return true;
+    }
+    if (op === '/' && (bar(dx, dy) || dot(dx, dy - GAP) || dot(dx, dy + GAP))) return true;
+  }
+  return false;
+}
+
+const SAMPLES = 3;                                    // per axis, so 9 per pixel
+
 function png(size, [r, g, b]) {
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(size, 0); ihdr.writeUInt32BE(size, 4);
   ihdr[8] = 8; ihdr[9] = 2;                      // 8-bit, truecolour RGB
-  const row = Buffer.concat([Buffer.from([0]), Buffer.from(Array.from({length: size}, () => [r, g, b]).flat())]);
-  const raw = Buffer.concat(Array.from({length: size}, () => row));
+
+  const rows = [];
+  for (let py = 0; py < size; py++) {
+    const row = Buffer.alloc(size * 3 + 1);      // leading 0 = no per-row filter
+    // A little vertical shading, so the tile isn't a dead flat square.
+    const shade = 1 - .16 * (py / size);
+    for (let px = 0; px < size; px++) {
+      let hits = 0;
+      for (let sy = 0; sy < SAMPLES; sy++)
+        for (let sx = 0; sx < SAMPLES; sx++)
+          if (inGlyph((px + (sx + .5) / SAMPLES) / size, (py + (sy + .5) / SAMPLES) / size)) hits++;
+      const ink = hits / (SAMPLES * SAMPLES);    // coverage, for a soft edge
+      const at = 1 + px * 3;
+      row[at]     = Math.round(r * shade * (1 - ink) + 255 * ink);
+      row[at + 1] = Math.round(g * shade * (1 - ink) + 255 * ink);
+      row[at + 2] = Math.round(b * shade * (1 - ink) + 255 * ink);
+    }
+    rows.push(row);
+  }
+
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0)),
+    chunk('IHDR', ihdr), chunk('IDAT', deflateSync(Buffer.concat(rows))), chunk('IEND', Buffer.alloc(0)),
   ]);
 }
 
